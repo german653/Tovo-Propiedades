@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Tovo Propiedades - Luxury Real Estate",
+  "description": "A premium, cinematic real estate platform for elite properties, featuring high-end visual presentation and seamless user experience.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": []
+}

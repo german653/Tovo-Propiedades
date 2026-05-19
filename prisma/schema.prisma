@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+model Property {
+  id          String   @id @default(uuid())
+  title       String
+  price       String
+  location    String
+  type        String   // 'Casa' | 'Departamento' | 'Terreno' | 'Local'
+  operation   String   // 'Venta' | 'Alquiler'
+  bedrooms    Int
+  bathrooms   Int
+  sqft        Int
+  description String
+  images      String[] // Array de URLs de imágenes
+  featured    Boolean  @default(false)
+  amenities   String[] // Array de características/amenities
+  lat         Float
+  lng         Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

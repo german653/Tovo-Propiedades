@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Plus Jakarta Sans", sans-serif;
+  --font-display: "Plus Jakarta Sans", sans-serif;
+
+  --color-brand-black: #050505;
+  --color-brand-gray-dark: #0a0a0b;
+  --color-brand-gray: #161618;
+  --color-brand-gray-light: #212124;
+  --color-brand-cream: #fafafa;
+  --color-brand-gold: #ffffff;
+
+  --animate-fade-up: fade-up 0.5s ease-out forwards;
+  --animate-reveal: reveal 1s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes reveal {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-brand-black text-brand-cream antialiased selection:bg-white selection:text-black;
+    background-image: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.03) 0%, transparent 50%),
+                      url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+    background-attachment: fixed;
+  }
+}
+
+:root {
+  background-color: var(--color-brand-black);
+  color: var(--color-brand-cream);
+}
+
+.glass-morphism {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.luxury-gradient {
+  background: linear-gradient(135deg, #050505 0%, #161618 100%);
+}
+
+.text-reveal {
+  overflow: hidden;
+}
+
+.text-reveal > span {
+  display: block;
+  animation: var(--animate-reveal);
+}
+
