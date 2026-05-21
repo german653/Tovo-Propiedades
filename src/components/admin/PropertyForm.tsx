@@ -248,7 +248,7 @@ export default function PropertyForm({ mode, initialData }: PropertyFormProps) {
 
       {/* Amenities */}
       <div className="bg-brand-black border border-white/5 rounded-sm p-8 space-y-6">
-        <h2 className="text-sm font-bold text-white uppercase tracking-widest border-b border-white/5 pb-4">Amenities</h2>
+        <h2 className="text-sm font-bold text-white uppercase tracking-widest border-b border-white/5 pb-4">Ambientes</h2>
         <Field label="Comodidades (una por línea)">
           <textarea
             value={form.amenities}
