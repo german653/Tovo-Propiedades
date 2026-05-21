@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Home, Users, Settings, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Home, LogOut, Menu, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -25,8 +25,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const menuItems = [
     { name: 'Dashboard', icon: LayoutDashboard, path: '/admin' },
     { name: 'Propiedades', icon: Home, path: '/admin/propiedades' },
-    { name: 'Leads', icon: Users, path: '/admin/leads' },
-    { name: 'Configuración', icon: Settings, path: '/admin/configuracion' },
   ];
 
   return (

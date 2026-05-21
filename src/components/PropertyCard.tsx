@@ -1,11 +1,12 @@
+"use client";
 import React from 'react';
-import { Property } from '../data/properties';
+import { SerializedProperty } from '../types/property';
 import Link from 'next/link';
 import { Bed, Bath, Move, ChevronRight } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export interface PropertyCardProps {
-  property: Property;
+  property: SerializedProperty;
   index: number;
 }
 
@@ -37,7 +38,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, index }) => {
             </span>
           </div>
 
-          {/* Price Tag - Better Styled */}
+          {/* Price Tag */}
           <div className="absolute bottom-10 left-8 z-20">
              <p className="text-brand-cream/60 text-[9px] uppercase tracking-[0.3em] font-bold mb-1">Inversión</p>
              <p className="text-3xl font-display font-bold text-white tracking-tight">{property.price}</p>
