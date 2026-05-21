@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SerializedProperty } from '../../types/property';
 import { Loader2, UploadCloud, X } from 'lucide-react';
+import MapPicker from './MapPicker';
 
 type FormMode = 'create' | 'edit';
 
@@ -44,8 +45,8 @@ export default function PropertyForm({ mode, initialData }: PropertyFormProps) {
     description: initialData?.description ?? '',
     featured: initialData?.featured ?? false,
     amenities: initialData?.amenities?.join('\n') ?? '',
-    lat: initialData?.lat?.toString() ?? '-34.6037',
-    lng: initialData?.lng?.toString() ?? '-58.3816',
+    lat: initialData?.lat?.toString() ?? '',
+    lng: initialData?.lng?.toString() ?? '',
   });
 
   const [uploadingImages, setUploadingImages] = useState(false);
@@ -57,7 +58,7 @@ export default function PropertyForm({ mode, initialData }: PropertyFormProps) {
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
-    
+
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
     const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
@@ -94,8 +95,6 @@ export default function PropertyForm({ mode, initialData }: PropertyFormProps) {
 
     setImageUrls(prev => [...prev, ...uploadedUrls]);
     setUploadingImages(false);
-    
-    // Reset file input
     e.target.value = '';
   };
 
@@ -105,13 +104,19 @@ export default function PropertyForm({ mode, initialData }: PropertyFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!form.lat || !form.lng) {
+      setError('Por favor, seleccioná la ubicación en el mapa antes de guardar.');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     const payload = {
       ...form,
       images: imageUrls,
-      amenities: form.amenities.split('\n').map(s => s.trim()).filter(Boolean),
+      amenities: form.amenities.split('\n').map((s: string) => s.trim()).filter(Boolean),
     };
 
     try {
@@ -156,7 +161,7 @@ export default function PropertyForm({ mode, initialData }: PropertyFormProps) {
           <Field label="Precio">
             <input required value={form.price} onChange={set('price')} className={inputCls} placeholder="Ej: USD 2.500.000" />
           </Field>
-          <Field label="Ubicación">
+          <Field label="Ubicación (texto visible en la web)">
             <input required value={form.location} onChange={set('location')} className={inputCls} placeholder="Ej: Nordelta, Buenos Aires" />
           </Field>
           <div className="grid grid-cols-2 gap-4">
@@ -206,7 +211,7 @@ export default function PropertyForm({ mode, initialData }: PropertyFormProps) {
       {/* Images */}
       <div className="bg-brand-black border border-white/5 rounded-sm p-8 space-y-6">
         <h2 className="text-sm font-bold text-white uppercase tracking-widest border-b border-white/5 pb-4">Imágenes</h2>
-        
+
         <div className="space-y-4">
           <div className="flex flex-col md:flex-row md:items-center gap-4">
             <label className={`flex items-center justify-center gap-2 px-6 py-3 border border-white/20 text-white font-bold uppercase tracking-widest text-xs hover:bg-white/5 transition-all cursor-pointer ${uploadingImages ? 'opacity-50 pointer-events-none' : ''}`}>
@@ -214,14 +219,13 @@ export default function PropertyForm({ mode, initialData }: PropertyFormProps) {
               {uploadingImages ? 'Subiendo...' : 'Subir Imágenes'}
               <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploadingImages} />
             </label>
-            <p className="text-white/40 text-xs">Puedes seleccionar varias fotos a la vez.</p>
+            <p className="text-white/40 text-xs">Podés seleccionar varias fotos a la vez.</p>
           </div>
 
           {imageUrls.length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
               {imageUrls.map((url, i) => (
                 <div key={i} className="relative group aspect-video bg-white/5 border border-white/10 rounded-sm overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={url} alt={`Preview ${i}`} className="w-full h-full object-cover" />
                   <button
                     type="button"
@@ -256,18 +260,20 @@ export default function PropertyForm({ mode, initialData }: PropertyFormProps) {
         </Field>
       </div>
 
-      {/* Location */}
+      {/* Map Picker */}
       <div className="bg-brand-black border border-white/5 rounded-sm p-8 space-y-6">
-        <h2 className="text-sm font-bold text-white uppercase tracking-widest border-b border-white/5 pb-4">Coordenadas del Mapa</h2>
-        <div className="grid grid-cols-2 gap-6">
-          <Field label="Latitud">
-            <input type="number" step="any" required value={form.lat} onChange={set('lat')} className={inputCls} placeholder="-34.6037" />
-          </Field>
-          <Field label="Longitud">
-            <input type="number" step="any" required value={form.lng} onChange={set('lng')} className={inputCls} placeholder="-58.3816" />
-          </Field>
+        <div className="border-b border-white/5 pb-4">
+          <h2 className="text-sm font-bold text-white uppercase tracking-widest">Ubicación en el Mapa</h2>
+          <p className="text-white/30 text-xs mt-1">Buscá la dirección o hacé click directamente en el mapa. También podés arrastrar el pin para mayor precisión.</p>
         </div>
-        <p className="text-white/20 text-xs">Buscá la propiedad en Google Maps → click derecho → Copiar coordenadas.</p>
+        <MapPicker
+          lat={form.lat}
+          lng={form.lng}
+          onChange={(lat, lng) => setForm(f => ({ ...f, lat, lng }))}
+        />
+        {!form.lat && !form.lng && (
+          <p className="text-yellow-500/60 text-xs">⚠ Todavía no seleccionaste ninguna ubicación en el mapa.</p>
+        )}
       </div>
 
       {/* Actions */}

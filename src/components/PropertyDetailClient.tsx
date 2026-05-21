@@ -1,16 +1,86 @@
 "use client";
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { SerializedProperty } from '../types/property';
 import { Bed, Bath, Move, MapPin, Share2, CheckCircle2, MessageCircle, ChevronLeft } from 'lucide-react';
 import PropertyGallery from './PropertyGallery';
-import { APIProvider, Map, AdvancedMarker, Pin } from '@vis.gl/react-google-maps';
-
-const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || '';
 
 interface PropertyDetailClientProps {
   property: SerializedProperty;
+}
+
+function PropertyMap({ lat, lng, location }: { lat: number; lng: number; location: string }) {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
+
+  useEffect(() => {
+    if (!mounted || !mapRef.current) return;
+
+    import('leaflet').then((L) => {
+      delete (L.Icon.Default.prototype as any)._getIconUrl;
+
+      if (mapInstanceRef.current) return;
+
+      const map = L.map(mapRef.current!, {
+        center: [lat, lng],
+        zoom: 15,
+        zoomControl: true,
+        scrollWheelZoom: false,
+      });
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+        maxZoom: 19,
+      }).addTo(map);
+
+      // Custom white pin
+      const customIcon = L.divIcon({
+        className: '',
+        html: `<div style="
+          width: 32px; height: 32px;
+          background: white;
+          border: 3px solid rgba(255,255,255,0.3);
+          border-radius: 50% 50% 50% 0;
+          transform: rotate(-45deg);
+          box-shadow: 0 4px 24px rgba(0,0,0,0.8);
+        "></div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -36],
+      });
+
+      const marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
+      marker.bindPopup(`<div style="font-family:sans-serif;font-size:12px;font-weight:bold;color:#000">${location}</div>`);
+
+      mapInstanceRef.current = map;
+    });
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mounted]);
+
+  if (!mounted) return (
+    <div className="h-[500px] bg-brand-gray-dark/40 border border-white/10 flex items-center justify-center">
+      <div className="text-white/20 text-sm">Cargando mapa...</div>
+    </div>
+  );
+
+  return (
+    <div className="relative">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+      <div ref={mapRef} className="w-full border border-white/10" style={{ height: '500px', zIndex: 0 }} />
+    </div>
+  );
 }
 
 export default function PropertyDetailClient({ property }: PropertyDetailClientProps) {
@@ -131,28 +201,7 @@ export default function PropertyDetailClient({ property }: PropertyDetailClientP
         {/* Map Section */}
         <div className="space-y-12">
           <h3 className="text-xs uppercase tracking-[0.5em] font-bold text-white/30 text-center">Ubicación Privilegiada</h3>
-          <div className="h-[500px] w-full bg-brand-gray-dark/40 border border-white/10 relative group overflow-hidden">
-            {API_KEY ? (
-              <APIProvider apiKey={API_KEY}>
-                <Map
-                  defaultCenter={{ lat: property.lat, lng: property.lng }}
-                  defaultZoom={15}
-                  mapId="PROPERTY_MAP"
-                  style={{ width: '100%', height: '100%' }}
-                >
-                  <AdvancedMarker position={{ lat: property.lat, lng: property.lng }}>
-                    <Pin background="#ffffff" glyphColor="#000000" borderColor="#ffffff" />
-                  </AdvancedMarker>
-                </Map>
-              </APIProvider>
-            ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center text-brand-cream">
-                <MapPin className="w-12 h-12 text-white mb-4 opacity-50" />
-                <p className="text-brand-cream/60 mb-4">Ubicación aproximada en {property.location}</p>
-                <p className="text-[10px] uppercase tracking-widest text-white font-bold opacity-30">Configuración de Mapa en curso</p>
-              </div>
-            )}
-          </div>
+          <PropertyMap lat={property.lat} lng={property.lng} location={property.location} />
         </div>
 
         {/* Final CTA */}
