@@ -219,7 +219,7 @@ export default function PropertyForm({ mode, initialData }: PropertyFormProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
           <Field label="Dormitorios">
             <input type="number" min="0" required value={form.bedrooms} onChange={set('bedrooms')} className={inputCls} />
           </Field>

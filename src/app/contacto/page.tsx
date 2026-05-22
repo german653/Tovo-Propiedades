@@ -90,7 +90,7 @@ export default function Contact() {
                      <span className="text-[10px] uppercase tracking-widest font-bold">Atención Directa</span>
                   </div>
                   <p className="text-brand-cream/60 text-lg leading-relaxed">
-                     +54 11 1234-5678 <br /> de Lunes a Viernes 9:00 - 18:00
+                     +54 351 342-7543 <br /> de Lunes a Viernes 9:00 - 18:00
                   </p>
                </div>
             </div>

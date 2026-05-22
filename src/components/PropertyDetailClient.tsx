@@ -207,7 +207,7 @@ export default function PropertyDetailClient({ property }: PropertyDetailClientP
           </div>
           <div className="flex flex-col md:flex-row items-center justify-center gap-6">
             <a
-              href={`https://wa.me/5491100000000?text=${waMessage}`}
+              href={`https://wa.me/5493513427543?text=${waMessage}`}
               target="_blank"
               rel="noopener noreferrer"
               className="px-12 py-6 bg-white text-brand-black font-bold uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-3 transition-transform hover:scale-105"

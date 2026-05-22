@@ -167,7 +167,7 @@ export default function MapPicker({ lat, lng, onChange }: MapPickerProps) {
   };
 
   if (!mounted) return (
-    <div className="h-[420px] bg-white/5 border border-white/10 flex items-center justify-center">
+    <div className="h-[300px] sm:h-[420px] bg-white/5 border border-white/10 flex items-center justify-center">
       <Loader2 className="w-6 h-6 animate-spin text-white/30" />
     </div>
   );
@@ -220,8 +220,8 @@ export default function MapPicker({ lat, lng, onChange }: MapPickerProps) {
         />
         <div
           ref={mapRef}
-          className="w-full border border-white/10"
-          style={{ height: '420px', zIndex: 0 }}
+          className="w-full border border-white/10 h-[300px] sm:h-[420px]"
+          style={{ zIndex: 0 }}
         />
         {/* Coords pill overlay */}
         {lat && lng && (

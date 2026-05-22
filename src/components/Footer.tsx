@@ -69,7 +69,7 @@ export default function Footer() {
                 <Phone className="w-4 h-4 text-white/40" />
                 <span className="text-[10px] uppercase tracking-widest font-bold">Teléfono</span>
               </div>
-              <span className="font-sans font-medium">+54 11 1234-5678</span>
+              <span className="font-sans font-medium">+54 351 342-7543</span>
             </li>
             <li className="flex flex-col items-end gap-2">
               <div className="flex items-center gap-3 text-white">

@@ -57,6 +57,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link 
                 key={item.name} 
                 href={item.path}
+                onClick={() => setSidebarOpen(false)}
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 text-sm transition-colors rounded-sm",
                   isActive ? "bg-white/10 text-white font-medium" : "text-white/50 hover:text-white hover:bg-white/5"
@@ -71,6 +72,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="p-4 border-t border-white/5">
           <button 
             onClick={() => {
+              setSidebarOpen(false);
               document.cookie = "tovo_admin=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
               router.push('/acceso');
             }}
@@ -80,6 +82,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
         </div>
       </aside>
+
+      {/* Backdrop overlay for mobile */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 z-30 bg-black/60 md:hidden animate-fade-in" 
+          onClick={() => setSidebarOpen(false)} 
+        />
+      )}
 
       {/* Main Content */}
       <main className="flex-1 overflow-x-hidden overflow-y-auto">
