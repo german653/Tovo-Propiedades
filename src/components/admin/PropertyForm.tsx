@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SerializedProperty } from '../../types/property';
 import { Loader2, UploadCloud, X } from 'lucide-react';
+import { useNotification } from '../../context/NotificationContext';
 import MapPicker from './MapPicker';
 
 type FormMode = 'create' | 'edit';
@@ -31,6 +32,7 @@ const selectCls = "w-full bg-brand-black border border-white/10 focus:border-whi
 export default function PropertyForm({ mode, initialData }: PropertyFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const { showToast, showAlert } = useNotification();
   const [error, setError] = useState('');
 
   const [form, setForm] = useState({
@@ -63,7 +65,10 @@ export default function PropertyForm({ mode, initialData }: PropertyFormProps) {
     const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
     if (!cloudName || !uploadPreset || cloudName === "TU_CLOUD_NAME") {
-      alert("Por favor, configura las credenciales de Cloudinary en el archivo .env primero.");
+      showAlert(
+        "Las credenciales de Cloudinary no están configuradas correctamente.\n\nPor favor, asegúrate de haber configurado las variables de entorno NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME y NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET en tu archivo .env local o en el panel de control de tu Deploy (ej. Vercel).",
+        "Configuración Requerida"
+      );
       return;
     }
 
@@ -85,15 +90,25 @@ export default function PropertyForm({ mode, initialData }: PropertyFormProps) {
         if (data.secure_url) {
           uploadedUrls.push(data.secure_url);
         } else {
-          console.error("Error cloudinary:", data);
+          const errMsg = data.error?.message || 'Error desconocido';
+          showAlert(
+            `No se pudo subir la imagen "${file.name}" a Cloudinary.\n\nDetalle del error:\n"${errMsg}"\n\nSi estás en producción (deploy), asegúrate de que las variables de entorno NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME y NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET estén configuradas en los ajustes de tu hosting (ej. Vercel) y que el preset en Cloudinary esté configurado como "Unsigned" (Sin firma).`,
+            "Error al Subir Imagen"
+          );
         }
       } catch (err) {
-        console.error('Error uploading image', err);
-        alert('Error al subir una de las imágenes');
+        const errMsg = err instanceof Error ? err.message : 'Error de conexión';
+        showAlert(
+          `Error de red al intentar subir "${file.name}".\n\nDetalle:\n${errMsg}\n\nPor favor, comprueba tu conexión a internet o verifica si hay bloqueos de solicitudes en tu red.`,
+          "Error de Conexión"
+        );
       }
     }
 
-    setImageUrls(prev => [...prev, ...uploadedUrls]);
+    if (uploadedUrls.length > 0) {
+      showToast(`¡${uploadedUrls.length} ${uploadedUrls.length === 1 ? 'imagen subida' : 'imágenes subidas'} con éxito!`, 'success');
+      setImageUrls(prev => [...prev, ...uploadedUrls]);
+    }
     setUploadingImages(false);
     e.target.value = '';
   };
@@ -107,6 +122,16 @@ export default function PropertyForm({ mode, initialData }: PropertyFormProps) {
 
     if (!form.lat || !form.lng) {
       setError('Por favor, seleccioná la ubicación en el mapa antes de guardar.');
+      showToast('Selecciona una ubicación en el mapa', 'error');
+      return;
+    }
+
+    if (imageUrls.length === 0) {
+      setError('Por favor, subí al menos una imagen para la propiedad.');
+      showAlert(
+        "Para guardar una propiedad, es necesario subir al menos una imagen mediante el botón 'Subir Imágenes'.\n\nEsto asegura que la propiedad se muestre correctamente y resulte atractiva para los interesados en el sitio principal.",
+        "Se requiere al menos una imagen"
+      );
       return;
     }
 
@@ -134,10 +159,26 @@ export default function PropertyForm({ mode, initialData }: PropertyFormProps) {
         throw new Error(data.error || 'Error desconocido');
       }
 
-      router.push('/admin/propiedades');
-      router.refresh();
+      const successMsg = mode === 'create'
+        ? '¡La propiedad ha sido creada con éxito en la base de datos y ya se encuentra visible para todos tus clientes!'
+        : '¡La propiedad ha sido actualizada con éxito y todos los cambios ya están aplicados correctamente!';
+
+      showAlert(
+        successMsg,
+        mode === 'create' ? '¡Creado Correctamente!' : '¡Actualizado Correctamente!',
+        () => {
+          router.push('/admin/propiedades');
+          router.refresh();
+        }
+      );
+
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al guardar');
+      const msg = err instanceof Error ? err.message : 'Error al guardar';
+      setError(msg);
+      showAlert(
+        `Ocurrió un error al intentar guardar la propiedad.\n\nDetalle: ${msg}\n\nPor favor, verifica la conexión a la base de datos o reintenta en unos instantes.`,
+        "Error al Guardar"
+      );
     } finally {
       setLoading(false);
     }

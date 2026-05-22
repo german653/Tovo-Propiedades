@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Pencil, Trash2, Star, Eye } from 'lucide-react';
 import { SerializedProperty } from '../../types/property';
 
+import { useNotification } from '../../context/NotificationContext';
+
 interface Props {
   properties: SerializedProperty[];
   showActions?: boolean;
@@ -13,22 +15,29 @@ interface Props {
 export default function AdminPropertiesTable({ properties, showActions = true }: Props) {
   const router = useRouter();
   const [deleting, setDeleting] = useState<string | null>(null);
+  const { showToast, showConfirm } = useNotification();
 
-  const handleDelete = async (id: string, title: string) => {
-    if (!confirm(`¿Eliminar "${title}"? Esta acción no se puede deshacer.`)) return;
-    setDeleting(id);
-    try {
-      const res = await fetch(`/api/properties/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        router.refresh();
-      } else {
-        alert('Error al eliminar la propiedad');
-      }
-    } catch {
-      alert('Error de conexión');
-    } finally {
-      setDeleting(null);
-    }
+  const handleDelete = (id: string, title: string) => {
+    showConfirm(
+      `¿Estás seguro de que deseas eliminar la propiedad "${title}"? Esta acción no se puede deshacer.`,
+      async () => {
+        setDeleting(id);
+        try {
+          const res = await fetch(`/api/properties/${id}`, { method: 'DELETE' });
+          if (res.ok) {
+            showToast('Propiedad eliminada con éxito', 'success');
+            router.refresh();
+          } else {
+            showToast('Error al eliminar la propiedad', 'error');
+          }
+        } catch {
+          showToast('Error de conexión', 'error');
+        } finally {
+          setDeleting(null);
+        }
+      },
+      'Eliminar Propiedad'
+    );
   };
 
   return (

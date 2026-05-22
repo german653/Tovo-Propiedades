@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { SerializedProperty } from '../types/property';
 import { Bed, Bath, Move, MapPin, Share2, CheckCircle2, MessageCircle, ChevronLeft } from 'lucide-react';
 import PropertyGallery from './PropertyGallery';
+import { useNotification } from '../context/NotificationContext';
 
 interface PropertyDetailClientProps {
   property: SerializedProperty;
@@ -32,6 +33,7 @@ function PropertyMap({ lat, lng, location }: { lat: number; lng: number; locatio
 
 export default function PropertyDetailClient({ property }: PropertyDetailClientProps) {
   const router = useRouter();
+  const { showToast } = useNotification();
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -42,11 +44,11 @@ export default function PropertyDetailClient({ property }: PropertyDetailClientP
           url: window.location.href,
         });
       } catch (err) {
-        console.log('Error al compartir', err);
+        showToast('Error al compartir la propiedad', 'error');
       }
     } else {
       navigator.clipboard.writeText(window.location.href);
-      alert('¡Enlace copiado al portapapeles!');
+      showToast('¡Enlace copiado al portapapeles!', 'success');
     }
   };
 
